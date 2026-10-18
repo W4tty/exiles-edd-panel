@@ -1,0 +1,45 @@
+Exiles Monitor panel for EDDiscovery
+====================================
+
+Shows the squad monitor (https://reports.theexiles.gg) as a tab inside EDDiscovery,
+the way the Inara tab works, and follows the system you are in.
+
+Needs: EDDiscovery 19.x on Windows (built and tested with 19.1.11) and the Microsoft Edge
+WebView2 Runtime, which EDDiscovery's own Inara, EDSM and Spansh tabs need as well
+(Windows 10 and 11 normally have it).
+
+Install
+-------
+1. Close EDDiscovery.
+2. Open PowerShell in this folder and run:
+
+       powershell -ExecutionPolicy Bypass -File .\install.ps1
+
+   It copies ExilesMonitorPanel.dll into EDDiscovery's DLL folder and unblocks it.
+   By hand instead: copy ExilesMonitorPanel.dll into the DLL folder of EDDiscovery's data folder
+   (normal install: %LOCALAPPDATA%\EDDiscovery\DLL, portable install: <EDDiscovery folder>\EDDiscovery\DLL),
+   right-click the copied file, Properties, tick Unblock.
+3. Start EDDiscovery. It asks:
+       "The following application extension DLL have been found. Do you wish to allow it to be used?"
+   Click Yes.
+4. Click the + tab at the right end of the tab strip and pick "Exiles Monitor".
+   The same list can open it as a pop-out window instead of a tab.
+   If "Exiles Monitor" is not in the list, close EDDiscovery and start it again once.
+
+The EDDiscovery Log panel shows "DLLs loaded: ExilesMonitorPanel" when the DLL was accepted.
+
+Using it
+--------
+Toolbar: Monitor (front page), Back, Reload, Follow my ship, the system you are in,
+Open in browser, Site (change the address, for ops.theexiles.gg or a test server).
+
+With "Follow my ship" ticked the panel opens the monitor page for the system of the
+newest journal entry, and when you dock, that station on the system page. Untick it to browse
+freely; the toolbar still shows where you are.
+
+Remove
+------
+Close EDDiscovery, run   powershell -ExecutionPolicy Bypass -File .\install.ps1 -Uninstall
+(or delete ExilesMonitorPanel.dll from the DLL folder), then start EDDiscovery and close the tab.
+
+Source and updates: https://github.com/W4tty/exiles-edd-panel

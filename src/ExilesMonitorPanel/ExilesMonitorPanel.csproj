@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- EDDiscovery panel DLL: .NET Framework 4.8 WinForms, the same runtime EDDiscovery 19.x runs on. -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <OutputType>Library</OutputType>
+    <AssemblyName>ExilesMonitorPanel</AssemblyName>
+    <RootNamespace>ExilesMonitorPanel</RootNamespace>
+    <LangVersion>7.3</LangVersion>
+    <Nullable>disable</Nullable>
+    <Version>1.0.0</Version>
+    <Company>The Exiles</Company>
+    <Product>Exiles Monitor panel for EDDiscovery</Product>
+    <Description>Shows the Exiles squad monitor (reports.theexiles.gg) as an EDDiscovery panel and follows the system you are in.</Description>
+    <Deterministic>true</Deterministic>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Compile against the exact WebView2 build EDDiscovery 19.1.11 ships (1.0.1054.31, strong named).
+         Nothing from the package is copied to the output: EDDiscovery's own copies are used at run time. -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1054.31" ExcludeAssets="runtime;native;build;buildTransitive;contentFiles" />
+    <!-- The EDD DLL interface assembly from the EDDiscovery 19.1.11 portable zip (Apache 2.0). Not copied: EDD's own copy is used. -->
+    <Reference Include="EDDDLLInterfaces">
+      <HintPath>..\..\lib\EDDDLLInterfaces.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Web.Extensions" />
+  </ItemGroup>
+
+</Project>
