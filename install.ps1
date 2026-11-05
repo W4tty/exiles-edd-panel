@@ -10,10 +10,15 @@
   Data folder rules (the same ones EDDiscovery uses):
     portable install      <EDDiscovery.exe folder>\EDDiscovery\   (EDD started with -portable)
     normal install        %LOCALAPPDATA%\EDDiscovery\
-  The DLL goes into the DLL subfolder of that data folder. Pass -DllFolder if EDD runs with -appfolder.
+  The DLL goes into the DLL subfolder of that data folder.
+
+  The EDDiscovery folder is found on its own: the one passed with -EddFolder, else the running
+  EDDiscovery, else the installed one (Windows' list of installed programs), else Program Files,
+  else D:\WattysRig\Apps\EDDiscovery. A portable data folder next to any of those wins; otherwise
+  %LOCALAPPDATA%\EDDiscovery is used. Pass -DllFolder if EDD runs with -appfolder.
 
 .PARAMETER EddFolder
-  Folder holding EDDiscovery.exe, used to detect a portable install. Default D:\WattysRig\Apps\EDDiscovery.
+  Folder holding EDDiscovery.exe, if it isn't found on its own.
 
 .PARAMETER DllFolder
   Use this folder instead of working it out.
@@ -23,11 +28,11 @@
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File .\install.ps1
-  powershell -ExecutionPolicy Bypass -File .\install.ps1 -EddFolder "C:\Program Files\EDDiscovery"
+  powershell -ExecutionPolicy Bypass -File .\install.ps1 -EddFolder "E:\Games\EDDiscovery"
   powershell -ExecutionPolicy Bypass -File .\install.ps1 -Uninstall
 #>
 param(
-    [string]$EddFolder = 'D:\WattysRig\Apps\EDDiscovery',
+    [string]$EddFolder = '',
     [string]$DllFolder = '',
     [switch]$Uninstall
 )
@@ -39,19 +44,45 @@ if (-not $Uninstall -and -not (Test-Path -LiteralPath $src)) {
     throw "ExilesMonitorPanel.dll is not next to this script ($here)."
 }
 
+function Test-File([string]$path) {
+    # Test-Path without tripping over a drive this PC doesn't have
+    try { return [IO.File]::Exists($path) } catch { return $false }
+}
+
+function Find-EddFolders {
+    $found = New-Object System.Collections.Generic.List[string]
+    if ($EddFolder -ne '') { $found.Add($EddFolder) }
+    $proc = Get-Process -Name EDDiscovery -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($proc -and $proc.Path) { $found.Add((Split-Path -Parent $proc.Path)) }
+    $keys = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+            'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*',
+            'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    Get-ItemProperty $keys -ErrorAction SilentlyContinue |
+        Where-Object { $_.DisplayName -like 'EDDiscovery*' -and $_.InstallLocation } |
+        ForEach-Object { $found.Add($_.InstallLocation.TrimEnd('\')) }
+    foreach ($pf in @($env:ProgramFiles, ${env:ProgramFiles(x86)})) {
+        if ($pf) { $found.Add([IO.Path]::Combine($pf, 'EDDiscovery')) }
+    }
+    $found.Add('D:\WattysRig\Apps\EDDiscovery')
+    return $found | Select-Object -Unique
+}
+
 if ($DllFolder -eq '') {
-    $portableDb = Join-Path $EddFolder 'EDDiscovery\EDDUser.sqlite'
-    $localDb = Join-Path $env:LOCALAPPDATA 'EDDiscovery\EDDUser.sqlite'
-    if (Test-Path -LiteralPath $portableDb) {
-        $DllFolder = Join-Path $EddFolder 'EDDiscovery\DLL'
-        Write-Output "Portable EDDiscovery data found under $EddFolder"
+    $localData = [IO.Path]::Combine($env:LOCALAPPDATA, 'EDDiscovery')
+    foreach ($folder in Find-EddFolders) {
+        $portableData = [IO.Path]::Combine($folder, 'EDDiscovery')
+        if (Test-File ([IO.Path]::Combine($portableData, 'EDDUser.sqlite'))) {
+            $DllFolder = [IO.Path]::Combine($portableData, 'DLL')
+            Write-Output "Portable EDDiscovery data found under $folder"
+            break
+        }
     }
-    elseif (Test-Path -LiteralPath $localDb) {
-        $DllFolder = Join-Path $env:LOCALAPPDATA 'EDDiscovery\DLL'
-        Write-Output "EDDiscovery data found under $env:LOCALAPPDATA\EDDiscovery"
+    if ($DllFolder -eq '' -and (Test-File ([IO.Path]::Combine($localData, 'EDDUser.sqlite')))) {
+        $DllFolder = [IO.Path]::Combine($localData, 'DLL')
+        Write-Output "EDDiscovery data found under $localData"
     }
-    else {
-        throw "No EDDiscovery data folder found (looked for $portableDb and $localDb). Start EDDiscovery once, or pass -DllFolder."
+    if ($DllFolder -eq '') {
+        throw "No EDDiscovery data folder found (looked next to EDDiscovery.exe and in $localData). Start EDDiscovery once, or pass -DllFolder."
     }
 }
 
