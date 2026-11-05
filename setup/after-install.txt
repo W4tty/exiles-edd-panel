@@ -1,0 +1,14 @@
+The Exiles Monitor panel is installed.
+
+1. Start EDDiscovery. It asks:
+     "The following application extension DLL have been found. Do you wish to allow it to be used?"
+   Click Yes.
+
+2. Click the + tab at the right end of the tab strip and pick "Exiles Monitor".
+   The same list can open it as a pop-out window instead of a tab.
+
+3. If "Exiles Monitor" is not in the list, close EDDiscovery and start it again once.
+
+The EDDiscovery Log panel shows "DLLs loaded: ExilesMonitorPanel" when the DLL was accepted.
+
+To remove it: Windows Settings, Apps, Installed apps, "Exiles Monitor panel for EDDiscovery", Uninstall.

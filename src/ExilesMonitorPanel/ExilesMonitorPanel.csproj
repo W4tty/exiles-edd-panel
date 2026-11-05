@@ -9,7 +9,7 @@
     <RootNamespace>ExilesMonitorPanel</RootNamespace>
     <LangVersion>7.3</LangVersion>
     <Nullable>disable</Nullable>
-    <Version>1.0.0</Version>
+    <Version>1.0.2</Version>
     <Company>The Exiles</Company>
     <Product>Exiles Monitor panel for EDDiscovery</Product>
     <Description>Shows the Exiles squad monitor (reports.theexiles.gg) as an EDDiscovery panel and follows the system you are in.</Description>

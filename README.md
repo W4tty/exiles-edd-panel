@@ -9,15 +9,17 @@ which EDDiscovery's own Inara, EDSM and Spansh tabs need as well.
 
 ## Install
 
-Download `ExilesMonitorPanel-<version>.zip` from the
-[releases page](https://github.com/W4tty/exiles-edd-panel/releases), unzip it, close EDDiscovery and run
-
-```
-powershell -ExecutionPolicy Bypass -File .\install.ps1
-```
+Download `ExilesMonitorPanel-Setup-<version>.exe` from the
+[releases page](https://github.com/W4tty/exiles-edd-panel/releases) and run it. It finds EDDiscovery's DLL folder
+(normal or portable install), needs no admin rights, waits for you to close EDDiscovery if it's open, and adds an
+uninstall entry to Windows' Installed apps. Windows SmartScreen may warn because the setup isn't signed: More info,
+Run anyway.
 
 Then start EDDiscovery, click Yes when it asks to allow `ExilesMonitorPanel.dll`, click the `+` tab and
-pick "Exiles Monitor". The full steps, the manual copy and the uninstall are in `INSTALL.txt`.
+pick "Exiles Monitor".
+
+Without the setup: `ExilesMonitorPanel-<version>.zip` holds the DLL and `install.ps1`
+(`powershell -ExecutionPolicy Bypass -File .\install.ps1`); the steps and the manual copy are in `INSTALL.txt`.
 
 ## What it does
 
@@ -51,11 +53,12 @@ process with the Inara, EDSM and Spansh tabs.
 
 ```
 dotnet build src/ExilesMonitorPanel/ExilesMonitorPanel.csproj -c Release
-powershell -ExecutionPolicy Bypass -File build/package.ps1 -Version v1.0.0
+powershell -ExecutionPolicy Bypass -File build/package.ps1 -Version v1.0.2
 ```
 
 The output is `src/ExilesMonitorPanel/bin/Release/ExilesMonitorPanel.dll`; the package script zips it with the
-install script and notes into `dist/`. A push of a `v*` tag builds the zip on GitHub Actions and attaches it
+install script and notes into `dist/`, and builds `dist/ExilesMonitorPanel-Setup-<version>.exe` from
+`setup/ExilesMonitorPanel.iss` when Inno Setup 6 is installed (GitHub Actions installs it). A push of a `v*` tag builds the zip on GitHub Actions and attaches it
 to a release.
 
 `lib/EDDDLLInterfaces.dll` is the interface assembly from the EDDiscovery 19.1.11 portable zip (Apache 2.0),

@@ -34,6 +34,23 @@ if (Test-Path $zip) { Remove-Item $zip -Force }
 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip
 Remove-Item $stage -Recurse -Force
 
+# The Windows setup (Inno Setup 6). Built when ISCC is on the PC (GitHub Actions installs it); the zip is always made.
+$iscc = (Get-Command iscc.exe -ErrorAction SilentlyContinue).Source
+if (-not $iscc) {
+    foreach ($p in @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe",
+                     "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe")) {
+        if (Test-Path -LiteralPath $p) { $iscc = $p; break }
+    }
+}
+if ($iscc) {
+    & $iscc /Q ("/DAppVersion=" + $Version.TrimStart('v')) ("/O" + $dist) (Join-Path $root 'setup\ExilesMonitorPanel.iss')
+    if ($LASTEXITCODE -ne 0) { throw 'setup build failed' }
+    Get-ChildItem $dist -Filter 'ExilesMonitorPanel-Setup-*.exe' | ForEach-Object { Write-Output ("setup  " + $_.FullName) }
+}
+else {
+    Write-Warning 'Inno Setup (ISCC.exe) not found: zip only, no setup .exe'
+}
+
 $hash = (Get-FileHash $zip -Algorithm SHA256).Hash
 $dllhash = (Get-FileHash (Join-Path $bin 'ExilesMonitorPanel.dll') -Algorithm SHA256).Hash
 Write-Output "zip    $zip"
